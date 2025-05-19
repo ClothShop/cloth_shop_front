@@ -27,12 +27,8 @@ export default function CartPage() {
   const handleApplyPromoCode = async () => {
     if (!promoInput.trim()) return
 
-    setIsApplying(true)
-    try {
-      await applyPromoCode(promoInput.trim())
-    } finally {
-      setIsApplying(false)
-    }
+    const isApplied = await applyPromoCode(promoInput.trim())
+    setIsApplying(isApplied)
   }
 
   const handleBuyNow = async () => {

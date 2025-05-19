@@ -18,7 +18,7 @@ export function ProductFilters() {
   const [isOpen, setIsOpen] = useState(false)
   const [categoriesLoading, setCategoriesLoading] = useState(true)
 
-  const currentCategory = searchParams.get("category") || ""
+  const currentCategory = Number(searchParams.get("category")) || 0
   const currentSort = searchParams.get("sort") || "newest"
   const currentMinPrice = searchParams.get("minPrice") || ""
   const currentMaxPrice = searchParams.get("maxPrice") || ""
@@ -47,13 +47,13 @@ export function ProductFilters() {
     }
   }, [currentMinPrice, currentMaxPrice])
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = (categoryId: number) => {
     const params = new URLSearchParams(searchParams.toString())
 
     if (categoryId === currentCategory) {
       params.delete("category")
     } else {
-      params.set("category", categoryId)
+      params.set("category", String(categoryId))
     }
 
     params.set("page", "1")
@@ -130,10 +130,10 @@ export function ProductFilters() {
 interface FiltersContentProps {
   categories: Category[]
   categoriesLoading: boolean
-  currentCategory: string
+  currentCategory: number
   currentSort: string
   priceRange: number[]
-  handleCategoryChange: (categoryId: string) => void
+  handleCategoryChange: (categoryId: number) => void
   handleSortChange: (sort: string) => void
   handlePriceChange: (values: number[]) => void
   applyPriceFilter: () => void

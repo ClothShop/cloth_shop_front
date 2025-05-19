@@ -36,12 +36,21 @@ export function AccountProfile({ user }: AccountProfileProps) {
 
     setIsSubmitting(true)
     try {
-      await updateUserProfile( user.id, {
+      await updateUserProfile({
         email: email,
-        name: firstName,
-        current_password: undefined,
-        new_password: undefined
-      } );
+        name: firstName
+      });
+      const savedUser = localStorage.getItem("user")
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser)
+        parsedUser.email = email;
+        parsedUser.name = firstName;
+        localStorage.setItem("user", JSON.stringify(parsedUser));
+      } else {
+        user.name = firstName;
+        user.email = email;
+        localStorage.setItem("user", JSON.stringify(user));
+      }
       setSuccess("Profile updated successfully");
       setIsSubmitting(false);
     } catch (error) {
@@ -68,9 +77,8 @@ export function AccountProfile({ user }: AccountProfileProps) {
 
     setIsSubmitting(true)
     try {
-      await updateUserProfile(user.id, {
-        email: undefined,
-        name: undefined,
+      await updateUserProfile({
+        is_changing_password: true,
         current_password: currentPassword,
         new_password: newPassword,
       });

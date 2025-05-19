@@ -42,11 +42,10 @@ export default function AdminPromoCodesPage() {
       setDataLoading(true)
       try {
         const codes = await fetchPromoCodes()
-        // Ensure we have valid promo codes with all required properties
         const validCodes = Array.isArray(codes)
           ? codes.filter(
               (code) =>
-                code && typeof code === "object" && typeof code.code === "string" && typeof code.id === "string",
+                code && typeof code === "object",
             )
           : []
         setPromoCodes(validCodes)
@@ -69,7 +68,7 @@ export default function AdminPromoCodesPage() {
     setIsDeleting(true)
     try {
       await deletePromoCode(promoToDelete)
-      setPromoCodes((prevCodes) => prevCodes.filter((code) => code.id !== promoToDelete))
+      setPromoCodes((prevCodes) => prevCodes.filter((code) => code._id !== promoToDelete))
       setPromoToDelete(null)
     } catch (error) {
       console.error("Failed to delete promo code:", error)
@@ -80,7 +79,7 @@ export default function AdminPromoCodesPage() {
 
   const handlePromoCodeSaved = (promoCode: PromoCode) => {
     if (editingPromo) {
-      setPromoCodes((prevCodes) => prevCodes.map((code) => (code.id === promoCode.id ? promoCode : code)))
+      setPromoCodes((prevCodes) => prevCodes.map((code) => (code._id === promoCode._id ? promoCode : code)))
       setEditingPromo(null)
     } else {
       setPromoCodes((prevCodes) => [...prevCodes, promoCode])
@@ -148,18 +147,18 @@ export default function AdminPromoCodesPage() {
                   </TableRow>
                 ) : (
                   filteredPromoCodes.map((code) => (
-                    <TableRow key={code.id}>
+                    <TableRow key={code._id}>
                       <TableCell className="font-medium">{code.code}</TableCell>
-                      <TableCell>{code.discountPercentage}%</TableCell>
-                      <TableCell>{new Date(code.validFrom).toLocaleDateString()}</TableCell>
-                      <TableCell>{new Date(code.validTo).toLocaleDateString()}</TableCell>
+                      <TableCell>{code.discount_percentage}%</TableCell>
+                      <TableCell>{new Date(code.valid_from).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(code.valid_to).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            code.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            code.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {code.isActive ? "Active" : "Inactive"}
+                          {code.is_active ? "Active" : "Inactive"}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -168,7 +167,7 @@ export default function AdminPromoCodesPage() {
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
-                          <Button variant="outline" size="icon" onClick={() => setPromoToDelete(code.id)}>
+                          <Button variant="outline" size="icon" onClick={() => setPromoToDelete(code._id)}>
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Delete</span>
                           </Button>

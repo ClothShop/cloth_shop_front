@@ -107,8 +107,8 @@ export function ProductDetails({ id }: ProductDetailsProps) {
             <p className="text-2xl font-semibold">
               ${selectedVariant ? selectedVariant.price.toFixed(2) : product.price.toFixed(2)}
             </p>
-            {product.compareAtPrice && (
-              <p className="ml-2 text-lg text-muted-foreground line-through">${product.compareAtPrice.toFixed(2)}</p>
+            {product.compare_at_price && (
+              <p className="ml-2 text-lg text-muted-foreground line-through">${product.compare_at_price.toFixed(2)}</p>
             )}
           </div>
         </div>

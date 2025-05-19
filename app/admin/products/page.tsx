@@ -123,7 +123,7 @@ export default function AdminProductsPage() {
                     <TableRow key={product.id}>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>${product.price.toFixed(2)}</TableCell>
-                      <TableCell>{product.category}</TableCell>
+                      <TableCell>{product.category.name}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="outline" size="icon" asChild>

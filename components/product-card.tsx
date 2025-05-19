@@ -54,8 +54,8 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="mt-1 flex items-center justify-between">
           <p className="text-sm font-medium">
             ${product.price.toFixed(2)}
-            {product.compareAtPrice && (
-              <span className="ml-2 text-muted-foreground line-through">${product.compareAtPrice.toFixed(2)}</span>
+            {product.compare_at_price && (
+              <span className="ml-2 text-muted-foreground line-through">${product.compare_at_price.toFixed(2)}</span>
             )}
           </p>
           {product.variants && (

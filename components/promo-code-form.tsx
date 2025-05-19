@@ -18,18 +18,18 @@ interface PromoCodeFormProps {
 
 export function PromoCodeForm({ promoCode, onSave, onCancel }: PromoCodeFormProps) {
   const [code, setCode] = useState(promoCode?.code || "")
-  const [discountPercentage, setDiscountPercentage] = useState(promoCode?.discountPercentage.toString() || "10")
+  const [discountPercentage, setDiscountPercentage] = useState(promoCode?.discount_percentage.toString() || "10")
   const [validFrom, setValidFrom] = useState(
-    promoCode?.validFrom
-      ? new Date(promoCode.validFrom).toISOString().split("T")[0]
+    promoCode?.valid_from
+      ? new Date(promoCode.valid_from).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
   )
   const [validTo, setValidTo] = useState(
-    promoCode?.validTo
-      ? new Date(promoCode.validTo).toISOString().split("T")[0]
+    promoCode?.valid_to
+      ? new Date(promoCode.valid_to).toISOString().split("T")[0]
       : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
   )
-  const [isActive, setIsActive] = useState(promoCode?.isActive ?? true)
+  const [isActive, setIsActive] = useState(promoCode?.is_active ?? true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
 
@@ -52,15 +52,15 @@ export function PromoCodeForm({ promoCode, onSave, onCancel }: PromoCodeFormProp
     try {
       const promoData = {
         code: code.trim().toUpperCase(),
-        discountPercentage: discount,
-        validFrom: new Date(validFrom).toISOString(),
-        validTo: new Date(validTo).toISOString(),
-        isActive,
+        discount_percentage: discount,
+        valid_from: new Date(validFrom).toISOString(),
+        valid_to: new Date(validTo).toISOString(),
+        is_active: isActive,
       }
 
       let savedPromoCode
       if (promoCode) {
-        savedPromoCode = await updatePromoCode(promoCode.id, promoData)
+        savedPromoCode = await updatePromoCode(promoCode._id, promoData)
       } else {
         savedPromoCode = await createPromoCode(promoData)
       }

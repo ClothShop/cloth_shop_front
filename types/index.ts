@@ -46,9 +46,11 @@ export interface Product {
   name: string
   description: string
   price: number
-  compareAtPrice?: number | null
+  compare_at_price?: number | null
   images: string[]
-  category: string
+  image_files: File[]
+  category: Category
+  category_id: number
   variants?: ProductVariant[]
 }
 
@@ -59,17 +61,17 @@ export interface ProductVariant {
 }
 
 export interface Category {
-  id: string
+  id: number
   name: string
 }
 
 export interface PromoCode {
-  id: string
+  _id: string
   code: string
-  discountPercentage: number
-  validFrom: string
-  validTo: string
-  isActive: boolean
+  discount_percentage: number
+  valid_from: string
+  valid_to: string
+  is_active: boolean
 }
 
 export interface CartItem {

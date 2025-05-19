@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const savedUser = localStorage.getItem("user")
         if (savedUser) {
           const parsedUser = JSON.parse(savedUser)
-          parsedUser.walletBalance = 1000
           setUser(parsedUser)
         } else {
           const response = await axios.get("http://localhost:8888/api/v1/auth/users/me",
@@ -70,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           {withCredentials: true}
       )
       const { user } = response.data
+      user.walletBalance = 1000
       setUser(user)
       localStorage.setItem("user", JSON.stringify(user))
     } catch (error) {

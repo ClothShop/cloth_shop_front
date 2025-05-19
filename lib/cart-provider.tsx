@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import type { Product, CartItem } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/auth-provider"
+import axios from "axios";
 
 interface CartContextType {
   cartItems: CartItem[]
@@ -123,8 +124,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const applyPromoCode = async (code: string): Promise<boolean> => {
     try {
-      // For demo purposes, accept any promo code
-      const discountPercentage = 15
+      const response = await axios.get(`http://localhost:8888/api/v1/promos/code/${code}`)
+      const discountPercentage = response.data.discount_percentage
+      if (!discountPercentage) {
+        return false;
+      }
       setPromoCode(code)
       setDiscount(discountPercentage)
       toast({

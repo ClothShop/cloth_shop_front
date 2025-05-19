@@ -1,5 +1,6 @@
 import axios from "axios"
 import type { Product, Category, PromoCode } from "@/types"
+import {object} from "zod";
 
 // Configure axios with default headers
 axios.defaults.baseURL = "http://localhost"
@@ -19,13 +20,15 @@ interface UserUpdateDto {
   name?: string
   current_password?: string
   new_password?: string
+  is_changing_password?: boolean,
 }
 
 export async function fetchProducts(params: ProductsParams = {}) {
   try {
-    const response = await axios.get(":8080/api/v1/products", { params })
+    const response = await axios.get("http://localhost:8888/api/v1/products", {withCredentials: true})
+    console.log("response.data when fetching products: ", response.data)
     return {
-      products: Array.isArray(response.data.products) ? response.data.products : [],
+      products: Array.isArray(response.data) ? response.data : [],
       totalPages: response.data.totalPages || 1,
     }
   } catch (error) {
@@ -57,7 +60,7 @@ export async function fetchProducts(params: ProductsParams = {}) {
 
 export async function fetchProduct(id: string) {
   try {
-    const response = await axios.get(`:8080/api/v1/products/${id}`)
+    const response = await axios.get(`http://localhost:8888/api/v1/products/${id}`)
     // Ensure images is always an array
     const data = response.data
     if (!data.images || !Array.isArray(data.images)) {
@@ -102,53 +105,28 @@ export async function fetchProduct(id: string) {
 }
 
 export async function fetchFeaturedProducts(): Promise<Product[]> {
-  // Skip the API call entirely and return mock data directly
-  // This avoids the HTML response issue
   console.log("Using mock featured products data")
 
-  // Return mock data for demo purposes
-  return Array(4)
-    .fill(0)
-    .map((_, i) => ({
-      id: `featured-${i + 1}`,
-      name: `Featured Product ${i + 1}`,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      price: 99.99 + i * 20,
-      compareAtPrice: 129.99 + i * 20,
-      images: [`/placeholder.svg?height=600&width=400&text=Featured+${i + 1}`], // Ensure this is always an array
-      category: "category-1",
-      variants: Array(2)
-        .fill(0)
-        .map((_, j) => ({
-          id: `featured-variant-${i}-${j}`,
-          name: `Variant ${j + 1}`,
-          price: 99.99 + i * 20 + j * 10,
-        })),
-    }))
+  return []
 }
 
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    const response = await axios.get(":8080/api/v1/categories")
+    const response = await axios.get("http://localhost:8888/api/v1/categories")
     // Ensure we return an array
     return Array.isArray(response.data) ? response.data : []
   } catch (error) {
     console.error("Error fetching categories:", error)
     // Return mock data for demo purposes
     return [
-      { id: "category-1", name: "T-Shirts" },
-      { id: "category-2", name: "Shirts" },
-      { id: "category-3", name: "Pants" },
-      { id: "category-4", name: "Jeans" },
-      { id: "category-5", name: "Jackets" },
-      { id: "category-6", name: "Accessories" },
+      { id: 1, name: "T-Shirts" }
     ]
   }
 }
 
 export async function createOrder(orderData: any) {
   try {
-    const response = await axios.post(":8082/api/v1/orders", orderData)
+    const response = await axios.post("http://localhost:8888/api/v1/orders", orderData)
     return response.data
   } catch (error) {
     console.error("Error creating order:", error)
@@ -158,7 +136,7 @@ export async function createOrder(orderData: any) {
 
 export async function fetchOrders() {
   try {
-    const response = await axios.get(":8082/api/v1/orders")
+    const response = await axios.get("http://localhost:8888/api/v1/orders")
     return response.data
   } catch (error) {
     console.error("Error fetching orders:", error)
@@ -168,7 +146,7 @@ export async function fetchOrders() {
 
 export async function fetchAnalytics() {
   try {
-    const response = await axios.get(":8083/api/v1/analytics")
+    const response = await axios.get("http://localhost:8888/api/v1/analytics")
     return response.data
   } catch (error) {
     console.error("Error fetching analytics:", error)
@@ -203,7 +181,21 @@ export async function fetchAnalytics() {
 
 export async function createProduct(productData: Omit<Product, "id">) {
   try {
-    const response = await axios.post(":8080/api/v1/admin/products", productData)
+    const formData = new FormData()
+    formData.append("product", JSON.stringify(productData))
+    if (productData.image_files && Array.isArray(productData.image_files)) {
+      for (const file of productData.image_files) {
+        formData.append("images", file)
+      }
+    }
+
+    const response = await axios.post("http://localhost:8888/api/v1/products", formData, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+
     return response.data
   } catch (error) {
     console.error("Error creating product:", error)
@@ -213,7 +205,8 @@ export async function createProduct(productData: Omit<Product, "id">) {
 
 export async function updateProduct(id: string, productData: Partial<Product>) {
   try {
-    const response = await axios.put(`:8080/api/v1/admin/products/${id}`, productData)
+    console.log("updated product: ", productData)
+    const response = await axios.put(`http://localhost:8888/api/v1/products/${id}`, productData, {withCredentials: true})
     return response.data
   } catch (error) {
     console.error(`Error updating product ${id}:`, error)
@@ -223,7 +216,7 @@ export async function updateProduct(id: string, productData: Partial<Product>) {
 
 export async function deleteProduct(id: string) {
   try {
-    await axios.delete(`:8080/api/v1/admin/products/${id}`)
+    await axios.delete(`http://localhost:8888/api/v1/products/${id}`, {withCredentials: true})
     return true
   } catch (error) {
     console.error(`Error deleting product ${id}:`, error)
@@ -233,7 +226,7 @@ export async function deleteProduct(id: string) {
 
 export async function createPromoCode(promoData: any) {
   try {
-    const response = await axios.post(":8084/api/v1/admin/promo-codes", promoData)
+    const response = await axios.post("http://localhost:8888/api/v1/promos", promoData, {withCredentials: true})
     return response.data
   } catch (error) {
     console.error("Error creating promo code:", error)
@@ -243,7 +236,7 @@ export async function createPromoCode(promoData: any) {
 
 export async function fetchPromoCodes(): Promise<PromoCode[]> {
   try {
-    const response = await axios.get(":8084/api/v1/admin/promo-codes")
+    const response = await axios.get("http://localhost:8888/api/v1/promos", {withCredentials: true})
     if (Array.isArray(response.data)) {
       return response.data
     }
@@ -255,19 +248,19 @@ export async function fetchPromoCodes(): Promise<PromoCode[]> {
     return Array(5)
       .fill(0)
       .map((_, i) => ({
-        id: `promo-${i + 1}`,
+        _id: `promo-${i + 1}`,
         code: `DISCOUNT${i + 1}`,
-        discountPercentage: (i + 1) * 5,
-        validFrom: new Date(Date.now() - i * 86400000).toISOString(),
-        validTo: new Date(Date.now() + (30 - i) * 86400000).toISOString(),
-        isActive: i < 4,
+        discount_percentage: (i + 1) * 5,
+        valid_from: new Date(Date.now() - i * 86400000).toISOString(),
+        valid_to: new Date(Date.now() + (30 - i) * 86400000).toISOString(),
+        is_active: i < 4,
       }))
   }
 }
 
 export async function updatePromoCode(id: string, promoData: any) {
   try {
-    const response = await axios.put(`:8084/api/v1/admin/promo-codes/${id}`, promoData)
+    const response = await axios.put(`http://localhost:8888/api/v1/promos/${id}`, promoData, {withCredentials: true})
     return response.data
   } catch (error) {
     console.error(`Error updating promo code ${id}:`, error)
@@ -277,7 +270,7 @@ export async function updatePromoCode(id: string, promoData: any) {
 
 export async function deletePromoCode(id: string) {
   try {
-    await axios.delete(`:8084/api/v1/admin/promo-codes/${id}`)
+    await axios.delete(`http://localhost:8888/api/v1/promos/${id}`, {withCredentials: true})
     return true
   } catch (error) {
     console.error(`Error deleting promo code ${id}:`, error)
@@ -285,9 +278,9 @@ export async function deletePromoCode(id: string) {
   }
 }
 
-export async function updateUserProfile(id: string, reqBody: UserUpdateDto): Promise<void> {
+export async function updateUserProfile(reqBody: UserUpdateDto): Promise<void> {
   try {
-    await axios.put(`:8085/api/v1/users/${id}`, reqBody)
+    await axios.patch(`http://localhost:8888/api/v1/users/me`, reqBody, {withCredentials: true})
   } catch (error) {
     console.error("Error updating user profile:", error)
     throw error
