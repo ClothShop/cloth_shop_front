@@ -65,61 +65,120 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("discount", discount.toString())
   }, [promoCode, discount])
 
-  const addToCart = (product: Product, quantity = 1, variant?: string) => {
-    setCartItems((prevItems) => {
-      // If variant is specified, check if that specific variant is already in cart
-      if (variant) {
-        const existingItemWithVariant = prevItems.find(
-          (item) => item.product.id === product.id && item.variant === variant,
+  const addToCart = async (product: Product, quantity = 1) => {
+    try {
+      const response = await axios.post(
+          "http://localhost:8888/api/v1/carts/me/add",
+          {
+            product_id: product.id,
+            quantity,
+          },
+          { withCredentials: true }
+      )
+
+      setCartItems(response.data)
+      localStorage.setItem("cart", JSON.stringify(cartItems))
+
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart.`,
+      })
+    } catch (error) {
+      console.error("Failed to add to cart:", error)
+      toast({
+        title: "Error",
+        description: "Could not add item to cart. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const removeFromCart = async (productId: string) => {
+    try {
+      const response = await axios.delete(
+          `http://localhost:8888/api/v1/carts/me/${productId}`,
+          { withCredentials: true }
+      )
+
+      setCartItems(response.data)
+      localStorage.setItem("cart", JSON.stringify(cartItems))
+
+      toast({
+        title: "Removed from cart",
+        description: `Product has been removed from your cart.`,
+      })
+    } catch (error) {
+      console.error("Failed to remove product from cart:", error)
+      toast({
+        title: "Error",
+        description: "Could not remove product from cart. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const updateQuantity = async (productId: string, quantity: number) => {
+    try {
+      let response;
+      if (quantity === -1) {
+        response = await axios.delete(
+            `http://localhost:8888/api/v1/carts/me/${productId}/decrement`,
+            { withCredentials: true }
         )
-
-        if (existingItemWithVariant) {
-          return prevItems.map((item) =>
-            item.product.id === product.id && item.variant === variant
-              ? { ...item, quantity: item.quantity + quantity }
-              : item,
-          )
-        }
-
-        // If not found with variant, add as new item with variant
-        return [...prevItems, { product, quantity, variant }]
       } else {
-        // Original behavior for items without variants
-        const existingItem = prevItems.find((item) => item.product.id === product.id && !item.variant)
-
-        if (existingItem) {
-          return prevItems.map((item) =>
-            item.product.id === product.id && !item.variant ? { ...item, quantity: item.quantity + quantity } : item,
-          )
-        }
-
-        return [...prevItems, { product, quantity }]
+        response = await axios.post(
+            `http://localhost:8888/api/v1/carts/me/add`,
+            {
+              product_id: productId,
+              quantity: 1,
+            },
+            { withCredentials: true }
+        )
       }
-    })
 
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-    })
+      setCartItems(response.data)
+      localStorage.setItem("cart", JSON.stringify(cartItems))
+
+      toast({
+        title: "Product has been updated",
+        description: `Product has been updated.`,
+      })
+    } catch (error) {
+      console.error("Failed to update product from cart:", error)
+      toast({
+        title: "Error",
+        description: "Could not update product quantity from cart. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const removeFromCart = (productId: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.product.id !== productId))
-  }
+  const clearCart = async () => {
+    try {
+      await axios.delete(
+          `http://localhost:8888/api/v1/carts/me`,
+          { withCredentials: true }
+      )
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity < 1) return
+      setCartItems([])
+      setPromoCode(null)
+      setDiscount(0)
+      localStorage.removeItem("cart")
+      localStorage.removeItem("promoCode")
+      localStorage.removeItem("discount")
 
-    setCartItems((prevItems) => prevItems.map((item) => (item.product.id === productId ? { ...item, quantity } : item)))
-  }
-
-  const clearCart = () => {
-    setCartItems([])
-    setPromoCode(null)
-    setDiscount(0)
-    localStorage.removeItem("cart")
-    localStorage.removeItem("promoCode")
-    localStorage.removeItem("discount")
+      toast({
+        title: "Cart removed",
+        description: `Cart removed.`,
+      })
+    } catch (error) {
+      console.error("Failed to remove cart:", error)
+      toast({
+        title: "Error",
+        description: "Could not remove cart. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const applyPromoCode = async (code: string): Promise<boolean> => {
@@ -190,7 +249,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const subtotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
+  const subtotal = cartItems.reduce((total, item) => {
+    return total + item.product.price * item.quantity
+  }, 0)
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0)
 

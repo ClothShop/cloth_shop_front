@@ -118,7 +118,7 @@ export default function CartPage() {
                               variant="outline"
                               size="icon"
                               className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.product.id, -1)}
                               disabled={item.quantity <= 1}
                             >
                               <Minus className="h-3 w-3" />
@@ -129,7 +129,7 @@ export default function CartPage() {
                               variant="outline"
                               size="icon"
                               className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.product.id, 1)}
                             >
                               <Plus className="h-3 w-3" />
                               <span className="sr-only">Increase quantity</span>

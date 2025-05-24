@@ -26,7 +26,6 @@ interface UserUpdateDto {
 export async function fetchProducts(params: ProductsParams = {}) {
   try {
     const response = await axios.get("http://localhost:8888/api/v1/products", {withCredentials: true})
-    console.log("response.data when fetching products: ", response.data)
     return {
       products: Array.isArray(response.data) ? response.data : [],
       totalPages: response.data.totalPages || 1,

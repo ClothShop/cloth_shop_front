@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               {withCredentials: true}
           )
           const { user } = response.data
+          user.walletBalance = 1000
           setUser(user)
           localStorage.setItem("user", JSON.stringify(user))
           router.push("/account")
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           {},
           {withCredentials: true}
       )
-      localStorage.removeItem("user")
+      localStorage.clear()
       setUser(null)
     } catch (error) {
       console.error("Logout error:", error)

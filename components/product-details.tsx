@@ -115,27 +115,6 @@ export function ProductDetails({ id }: ProductDetailsProps) {
         <div className="prose max-w-none">
           <p>{product.description}</p>
         </div>
-        {product.variants && product.variants.length > 0 && (
-          <div className="space-y-2">
-            <p className="font-medium">Size</p>
-            <div className="flex flex-wrap gap-2">
-              {product.variants.map((variant) => (
-                <button
-                  key={variant.id}
-                  className={cn(
-                    "h-10 rounded-md border px-4 text-center text-sm",
-                    selectedVariant?.id === variant.id
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                  )}
-                  onClick={() => setSelectedVariant(variant)}
-                >
-                  {variant.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         <div className="space-y-2">
           <p className="font-medium">Quantity</p>
           <div className="flex items-center space-x-2">
