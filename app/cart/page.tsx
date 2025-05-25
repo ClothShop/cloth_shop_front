@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth-provider"
 import { useToast } from "@/hooks/use-toast"
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, subtotal, applyPromoCode, promoCode, discount, total, checkout } =
+  const { cartItems, removeFromCart, updateQuantity, subtotal, applyPromoCode, promoCode, discount, total, checkout, buyNow } =
     useCart()
   const [promoInput, setPromoInput] = useState("")
   const [isApplying, setIsApplying] = useState(false)
@@ -46,7 +46,8 @@ export default function CartPage() {
     try {
       const success = await checkout()
       if (success) {
-        router.push("/account/orders")
+        const successBuy = await buyNow(cartItems)
+        router.push("/account")
       }
     } finally {
       setIsCheckingOut(false)

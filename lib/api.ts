@@ -135,7 +135,7 @@ export async function createOrder(orderData: any) {
 
 export async function fetchOrders() {
   try {
-    const response = await axios.get("http://localhost:8888/api/v1/orders")
+    const response = await axios.get("http://localhost:8888/api/v1/orders/me", {withCredentials: true})
     return response.data
   } catch (error) {
     console.error("Error fetching orders:", error)

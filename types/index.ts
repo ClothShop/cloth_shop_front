@@ -19,7 +19,7 @@ export interface Address {
 }
 
 export interface Order {
-  id: string
+  _id: string
   userId: string
   items: OrderItem[]
   subtotal: number

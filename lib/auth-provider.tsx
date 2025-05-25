@@ -97,11 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await axios.post("http://localhost:8888/api/v1/auth/logout",
-          {},
-          {withCredentials: true}
-      )
+      await axios.post("http://localhost:8888/api/v1/auth/logout", {}, { withCredentials: true })
+      const shippingAddress = localStorage.getItem("shippingAddress")
       localStorage.clear()
+      if (shippingAddress) {
+        localStorage.setItem("shippingAddress", shippingAddress)
+      }
       setUser(null)
     } catch (error) {
       console.error("Logout error:", error)

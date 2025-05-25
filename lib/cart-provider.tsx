@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Product, CartItem } from "@/types"
+import type {Product, CartItem, Order} from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/auth-provider"
 import axios from "axios";
@@ -19,6 +19,7 @@ interface CartContextType {
   discount: number
   total: number
   checkout: () => Promise<boolean>
+  buyNow: (items: CartItem[]) => Promise<void>
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -249,6 +250,65 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const buyNow = async (items: CartItem[]): Promise<void> => {
+    try {
+      if (!items.length) return
+
+      const orderItems = items.map(item => ({
+        productId: item.product.id.toString(),
+        productName: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity
+      }))
+
+      const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const discountAmount = discount || 0
+      const total = discount > 0 ? subtotal * (1 - discount / 100) : subtotal
+
+      const shippingAddress = JSON.parse(localStorage.getItem("shippingAddress") || "{}")
+      const paymentMethod = "card"
+
+      console.log("shipping address:", localStorage.getItem("shippingAddress") || null)
+
+      const order = {
+        items: orderItems,
+        subtotal,
+        discount: discountAmount,
+        total,
+        promoCode: promoCode,
+        status: "pending",
+        shippingAddress,
+        paymentMethod,
+        createdAt: new Date().toISOString(),
+      }
+
+      await axios.post(
+          `http://localhost:8888/api/v1/orders`,
+          order,
+          { withCredentials: true }
+      )
+
+      setCartItems([])
+      setPromoCode(null)
+      setDiscount(0)
+      localStorage.removeItem("cart")
+      localStorage.removeItem("promoCode")
+      localStorage.removeItem("discount")
+
+      toast({
+        title: "Products successfully purchased",
+        description: "You can see them in your account orders.",
+      })
+    } catch (error) {
+      console.error("Failed to buy:", error)
+      toast({
+        title: "Error",
+        description: "Could not complete purchase. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const subtotal = cartItems.reduce((total, item) => {
     return total + item.product.price * item.quantity
   }, 0)
@@ -272,6 +332,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         discount,
         total,
         checkout,
+        buyNow
       }}
     >
       {children}

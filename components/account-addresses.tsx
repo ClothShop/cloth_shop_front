@@ -1,8 +1,8 @@
-"use client"
+ "use client"
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Address } from "@/types"
 
 export function AccountAddresses() {
+  useEffect(() => {
+    const storedAddress = localStorage.getItem("shippingAddress")
+    if (storedAddress) {
+      const parsed = JSON.parse(storedAddress)
+      setAddresses([parsed])
+    }
+  }, [])
   const [addresses, setAddresses] = useState<Address[]>([
     {
       firstName: "John",
@@ -43,6 +50,7 @@ export function AccountAddresses() {
     setCurrentAddress(addresses[index])
     setIsEditing(true)
     setIsAdding(false)
+    localStorage.setItem("shippingAddress", JSON.stringify(addresses[index]))
   }
 
   const handleAdd = () => {
@@ -63,7 +71,9 @@ export function AccountAddresses() {
   }
 
   const handleDelete = (index: number) => {
-    setAddresses((prev) => prev.filter((_, i) => i !== index))
+    const newAddresses = addresses.filter((_, i) => i !== index)
+    setAddresses(newAddresses)
+    localStorage.setItem("shippingAddress", JSON.stringify(newAddresses[0] || {}))
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,11 +88,12 @@ export function AccountAddresses() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (isAdding) {
-      setAddresses((prev) => [...prev, currentAddress])
-    } else if (isEditing && editIndex !== null) {
-      setAddresses((prev) => prev.map((addr, i) => (i === editIndex ? currentAddress : addr)))
-    }
+    const updatedAddresses = isAdding
+      ? [...addresses, currentAddress]
+      : addresses.map((addr, i) => (i === editIndex ? currentAddress : addr))
+
+    setAddresses(updatedAddresses)
+    localStorage.setItem("shippingAddress", JSON.stringify(currentAddress))
 
     setIsAdding(false)
     setIsEditing(false)

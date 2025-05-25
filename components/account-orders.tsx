@@ -16,13 +16,61 @@ export function AccountOrders() {
       setLoading(true)
       try {
         const fetchedOrders = await fetchOrders()
-        setOrders(fetchedOrders)
+        if (fetchedOrders.length === 0) {
+          setOrders([
+            {
+              _id: "order-1",
+              userId: "user-1",
+              items: [
+                {
+                  productId: "product-1",
+                  productName: "Classic White T-Shirt",
+                  price: 29.99,
+                  quantity: 2,
+                },
+                {
+                  productId: "product-2",
+                  productName: "Black Denim Jeans",
+                  price: 59.99,
+                  quantity: 1,
+                },
+              ],
+              subtotal: 119.97,
+              discount: 10,
+              total: 107.97,
+              promoCode: "WELCOME10",
+              status: "delivered",
+              shippingAddress: {
+                firstName: "John",
+                lastName: "Doe",
+                address1: "123 Main St",
+                city: "New York",
+                state: "NY",
+                postalCode: "10001",
+                country: "USA",
+                phone: "555-123-4567",
+              },
+              billingAddress: {
+                firstName: "John",
+                lastName: "Doe",
+                address1: "123 Main St",
+                city: "New York",
+                state: "NY",
+                postalCode: "10001",
+                country: "USA",
+                phone: "555-123-4567",
+              },
+              paymentMethod: "Credit Card",
+              createdAt: "2023-01-15T12:00:00Z",
+            }])
+        } else {
+          setOrders(fetchedOrders)
+        }
       } catch (error) {
         console.error("Failed to fetch orders:", error)
-        // Mock data for demo
         setOrders([
           {
-            id: "order-1",
+            _id: "order-1",
             userId: "user-1",
             items: [
               {
@@ -67,7 +115,7 @@ export function AccountOrders() {
             createdAt: "2023-01-15T12:00:00Z",
           },
           {
-            id: "order-2",
+            _id: "order-2",
             userId: "user-1",
             items: [
               {
@@ -153,11 +201,11 @@ export function AccountOrders() {
   return (
     <div className="space-y-6">
       {orders.map((order) => (
-        <Card key={order.id}>
+        <Card key={order._id}>
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle>Order #{order.id}</CardTitle>
+                <CardTitle>Order #{order._id}</CardTitle>
                 <CardDescription>Placed on {new Date(order.createdAt).toLocaleDateString()}</CardDescription>
               </div>
               <span
@@ -202,7 +250,7 @@ export function AccountOrders() {
               </div>
               <div className="flex justify-between pt-4">
                 <Button variant="outline" asChild>
-                  <Link href={`/account/orders/${order.id}`}>View Details</Link>
+                  <Link href={`/account/orders/${order._id}`}>View Details</Link>
                 </Button>
                 {order.status === "delivered" && <Button variant="outline">Write a Review</Button>}
               </div>
